@@ -7,41 +7,41 @@
 #define MAX_ARGS 10
 #define MAX_ARG_SIZE 100
 
-void lsh_loop(void);
-char* lsh_read_line(void);
-char** lsh_split_line(char* line);
+void gvn_loop(void);
+char* gvn_read_line(void);
+char** gvn_split_line(char* line);
 int calculate_string_array_size(char** array);
-int lsh_execute_args(char** args);
-int lsh_execute_ls(char** args);
+int gvn_execute_args(char** args);
+int gvn_execute_ls(char** args);
 char** slice_args(char** args, int beginning, int end);
 
 int main(int argc, char* argv[]) {
     // Load config
 
-    lsh_loop();
+    gvn_loop();
 
     // Perform shutdown
     return 0;
 }
 
-void lsh_loop(void) {
+void gvn_loop(void) {
     char* line;
     char** args;
     int status;
 
     // We loop through once. We should read from stdin, parse the line, and execute arguments. We should do this as long as we haven't terminated
     do {
-        line = lsh_read_line();
+        line = gvn_read_line();
         if (strcmp(line, "q\n") == 0) {
             exit(EXIT_SUCCESS);
         }
-        args = lsh_split_line(line);
+        args = gvn_split_line(line);
 
-        status = lsh_execute_args(args);
+        status = gvn_execute_args(args);
     } while (status);   
 }
 
-char* lsh_read_line(void) {
+char* gvn_read_line(void) {
     char* line = malloc(sizeof(char) * BUFF_SIZE);
     fgets(line, 50, stdin);
     return line;
@@ -50,7 +50,7 @@ char* lsh_read_line(void) {
 /*
 A function that takes in a string, and splits it into an array of arguments. The first argument is always the command, and the remaining arguments are the arguments to that command. 
 */
-char** lsh_split_line(char* line) {
+char** gvn_split_line(char* line) {
     // We have to initialize an array of strings to hold memory
     char** args = malloc(sizeof(char*) * MAX_ARGS);
     char* tempString = malloc(sizeof(char) * MAX_ARG_SIZE);
@@ -82,12 +82,12 @@ char** lsh_split_line(char* line) {
 }
 
 // This is a function that executes the command provided in the args array. Note that args[0] holds the command. Let's implement ls
-int lsh_execute_args(char** args) {
+int gvn_execute_args(char** args) {
     char* command = args[0];
 
     // ls command
     if (strcmp(command, "ls") == 0) {
-        return lsh_execute_ls(slice_args(args, 1, calculate_string_array_size(args)));
+        return gvn_execute_ls(slice_args(args, 1, calculate_string_array_size(args)));
     }
 }
 
@@ -113,7 +113,7 @@ char** slice_args(char** array, int beginning, int end) {
 }
 
 // Recreates ls. Lists out all directories/files with the given filename. No wildcards yet
-int lsh_execute_ls(char** args) {
+int gvn_execute_ls(char** args) {
     WIN32_FIND_DATAA file_found; // Stores found file data
     HANDLE hFind; // Stores handle data returned by FindFile functions
 
