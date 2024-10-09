@@ -18,6 +18,7 @@ int gvn_execute_ls(char** args);
 char** slice_args(char** args, int beginning, int end);
 int gvn_execute_cat(char** args);
 int gvn_execute_cp(char** args);
+int gvn_execute_echo(char** args);
 
 int main(int argc, char* argv[]) {
     // Load config
@@ -107,6 +108,9 @@ int gvn_execute_args(char** args) {
     else if (strcmp(command, "clear") == 0) {
         system("cls");
         return 1;
+    }
+    else if (strcmp(command, "echo") == 0) {
+        return gvn_execute_echo(slice_args(args,1, calculate_string_array_size(args)));
     }
     else {
         printf("Unrecognized command\n");
@@ -224,5 +228,22 @@ int gvn_execute_cp(char** args) {
     free(buffer);
     fclose(fin);
     fclose(fout);
+    return 1;
+}
+
+int gvn_execute_echo(char** args) {
+    for (int arg = 0; arg < calculate_string_array_size(args); arg++) {
+        if (args[arg][0] == '"') {
+            int char_count = 1;
+            while (args[arg][char_count] != '"') {
+                printf("%c", args[arg][char_count]);
+                char_count++;
+            }
+            char_count = 1;
+            printf("\n");
+        } else {
+            printf("%s\n", args[arg]);
+        }
+    }
     return 1;
 }
