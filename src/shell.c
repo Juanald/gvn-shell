@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
+#include <unistd.h>
+#include <limits.h> 
 
 #define BUFF_SIZE 50
 #define MAX_ARGS 10
@@ -96,6 +98,19 @@ int gvn_execute_args(char** args) {
     }
     else if (strcmp(command, "cp") == 0) {
         return gvn_execute_cp(slice_args(args, 1, calculate_string_array_size(args)));
+    }
+    else if (strcmp(command, "pwd") == 0) {
+        char cwd[MAX_PATH];
+        printf("%s\n", getcwd(cwd, sizeof(cwd)));
+        return 1;
+    }
+    else if (strcmp(command, "clear") == 0) {
+        system("cls");
+        return 1;
+    }
+    else {
+        printf("Unrecognized command\n");
+        return 1;
     }
 }
 
