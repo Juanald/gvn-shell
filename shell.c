@@ -14,6 +14,7 @@ int calculate_string_array_size(char** array);
 int gvn_execute_args(char** args);
 int gvn_execute_ls(char** args);
 char** slice_args(char** args, int beginning, int end);
+int gvn_execute_cat(char** args);
 
 int main(int argc, char* argv[]) {
     // Load config
@@ -89,6 +90,9 @@ int gvn_execute_args(char** args) {
     if (strcmp(command, "ls") == 0) {
         return gvn_execute_ls(slice_args(args, 1, calculate_string_array_size(args)));
     }
+    else if (strcmp(command, "cat") == 0) {
+        return gvn_execute_cat(slice_args(args, 1, calculate_string_array_size(args)));
+    }
 }
 
 int calculate_string_array_size(char** array) {
@@ -112,7 +116,7 @@ char** slice_args(char** array, int beginning, int end) {
     return slice;
 }
 
-// Recreates ls. Lists out all directories/files with the given filename. No wildcards yet
+// Recreates ls. Lists out all directories/files with the given filename. No wildcards yet, only for windows
 int gvn_execute_ls(char** args) {
     WIN32_FIND_DATAA file_found; // Stores found file data
     HANDLE hFind; // Stores handle data returned by FindFile functions
@@ -136,5 +140,23 @@ int gvn_execute_ls(char** args) {
     } else {
         printf("Usage: ls arg1 arg2...");
     }
+    return 1;
+}
+
+// Implements the cat function for multiple arguments
+int gvn_execute_cat(char** args) {
+    FILE* f;
+    char string_buffer[100];
+    for (int i = 0; i < calculate_string_array_size(args); i++) {
+        f = fopen(args[i], "r");
+        if (f == NULL) {
+            printf("Failed to open %s\n", args[i]);
+        }
+        while(fgets(string_buffer, sizeof(string_buffer), f) != NULL) {
+            printf("%s", string_buffer);
+        }
+        printf("\n");
+        fclose(f);
+    } 
     return 1;
 }
