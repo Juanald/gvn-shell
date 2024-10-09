@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h>
 
 #define BUFF_SIZE 50
 #define MAX_ARGS 10
@@ -86,7 +87,7 @@ int lsh_execute_args(char** args) {
 
     // ls command
     if (strcmp(command, "ls") == 0) {
-        lsh_execute_ls(slice_args(args, 1, calculate_string_array_size(args)));
+        return lsh_execute_ls(slice_args(args, 1, calculate_string_array_size(args)));
     }
 }
 
@@ -111,6 +112,29 @@ char** slice_args(char** array, int beginning, int end) {
     return slice;
 }
 
+// Recreates ls. Lists out all directories/files with the given filename. No wildcards yet
 int lsh_execute_ls(char** args) {
-    
+    WIN32_FIND_DATAA file_found; // Stores found file data
+    HANDLE hFind; // Stores handle data returned by FindFile functions
+
+    if (calculate_string_array_size(args) == 0) {
+        hFind = FindFirstFile("*", &file_found);
+        do {
+            // Make sure the file is not an ancestor
+            if (strcmp(".", file_found.cFileName) != 0 && strcmp("..", file_found.cFileName) != 0) {
+                printf("%s\n", file_found.cFileName);
+            }
+        } while(FindNextFile(hFind, &file_found) != 0);
+        FindClose(hFind);
+        return 1;
+    } else if (calculate_string_array_size(args) > 0) {
+        for (int i = 0; i < calculate_string_array_size(args); i++) {
+            hFind = FindFirstFile(args[i], &file_found);
+            printf("%s\n", file_found.cFileName);
+        }
+        FindClose(hFind);
+    } else {
+        printf("Usage: ls arg1 arg2...");
+    }
+    return 1;
 }
