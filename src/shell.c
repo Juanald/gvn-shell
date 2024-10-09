@@ -15,6 +15,7 @@ int gvn_execute_args(char** args);
 int gvn_execute_ls(char** args);
 char** slice_args(char** args, int beginning, int end);
 int gvn_execute_cat(char** args);
+int gvn_execute_cp(char** args);
 
 int main(int argc, char* argv[]) {
     // Load config
@@ -93,6 +94,9 @@ int gvn_execute_args(char** args) {
     else if (strcmp(command, "cat") == 0) {
         return gvn_execute_cat(slice_args(args, 1, calculate_string_array_size(args)));
     }
+    else if (strcmp(command, "cp") == 0) {
+        return gvn_execute_cp(slice_args(args, 1, calculate_string_array_size(args)));
+    }
 }
 
 int calculate_string_array_size(char** array) {
@@ -158,5 +162,52 @@ int gvn_execute_cat(char** args) {
         printf("\n");
         fclose(f);
     } 
+    return 1;
+}
+
+// This function copies a file args[0] and puts it into another file args[1]
+int gvn_execute_cp(char** args) {
+    FILE* fin = fopen(args[0], "r");
+    FILE* fout = fopen(args[1], "w");
+    if (fin == NULL) {
+        printf("Couldn't find file %s", args[0]);
+        return 1;
+    }
+    if (fout == NULL) {
+        printf("Couldn't open new file %s", args[1]);
+        return 1;
+    }
+
+    // Initialize a buffer to hold the file string
+    char* buffer = malloc(sizeof(char) * 1024);
+    if (buffer == NULL) {
+        printf("Buffer memory allocation failed");
+        fclose(fin);
+        fclose(fout);
+        return 1;
+    }
+    int char_count = 0;
+    char c;
+
+    // Read a char until EOF. If buffer runs out of memory, reallocate. Store char into buffer
+    while ((c = fgetc(fin)) != EOF) {
+        buffer[char_count] = c;
+        char_count++;
+        if (char_count > 1024) {
+            buffer = realloc(buffer, sizeof(char) * char_count + 1024);
+            if (buffer == NULL) {
+                printf("Buffer memory allocation failed");
+                fclose(fin);
+                fclose(fout);
+                return 1;
+            }
+        }
+    }
+    // Write to the output file
+    fwrite(buffer, sizeof(char), char_count, fout);
+
+    free(buffer);
+    fclose(fin);
+    fclose(fout);
     return 1;
 }
