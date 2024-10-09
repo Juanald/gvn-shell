@@ -19,6 +19,7 @@ char** slice_args(char** args, int beginning, int end);
 int gvn_execute_cat(char** args);
 int gvn_execute_cp(char** args);
 int gvn_execute_echo(char** args);
+int gvn_execute_pwd();
 
 int main(int argc, char* argv[]) {
     // Load config
@@ -36,6 +37,7 @@ void gvn_loop(void) {
 
     // We loop through once. We should read from stdin, parse the line, and execute arguments. We should do this as long as we haven't terminated
     do {
+        gvn_execute_pwd();
         line = gvn_read_line();
         if (strcmp(line, "q\n") == 0) {
             exit(EXIT_SUCCESS);
@@ -101,9 +103,7 @@ int gvn_execute_args(char** args) {
         return gvn_execute_cp(slice_args(args, 1, calculate_string_array_size(args)));
     }
     else if (strcmp(command, "pwd") == 0) {
-        char cwd[MAX_PATH];
-        printf("%s\n", getcwd(cwd, sizeof(cwd)));
-        return 1;
+        return gvn_execute_pwd();
     }
     else if (strcmp(command, "clear") == 0) {
         system("cls");
@@ -245,5 +245,11 @@ int gvn_execute_echo(char** args) {
             printf("%s\n", args[arg]);
         }
     }
+    return 1;
+}
+
+int gvn_execute_pwd() {
+    char cwd[MAX_PATH];
+    printf("%s ", getcwd(cwd, sizeof(cwd)));
     return 1;
 }
