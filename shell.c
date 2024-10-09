@@ -10,6 +10,9 @@ void lsh_loop(void);
 char* lsh_read_line(void);
 char** lsh_split_line(char* line);
 int calculate_string_array_size(char** array);
+int lsh_execute_args(char** args);
+int lsh_execute_ls(char** args);
+char** slice_args(char** args, int beginning, int end);
 
 int main(int argc, char* argv[]) {
     // Load config
@@ -31,14 +34,9 @@ void lsh_loop(void) {
         if (strcmp(line, "q\n") == 0) {
             exit(EXIT_SUCCESS);
         }
-        // printf("%s", line);
         args = lsh_split_line(line);
-        
-        // Print each argument (for debugging)
-        // for (int i = 0; args[i] != NULL; i++) {
-        //     printf("arg[%d]: %s\n", i, args[i]);
-        // }
-        // status = lsh_execute_args(args);
+
+        status = lsh_execute_args(args);
     } while (status);   
 }
 
@@ -82,10 +80,37 @@ char** lsh_split_line(char* line) {
     return args;
 }
 
+// This is a function that executes the command provided in the args array. Note that args[0] holds the command. Let's implement ls
+int lsh_execute_args(char** args) {
+    char* command = args[0];
+
+    // ls command
+    if (strcmp(command, "ls") == 0) {
+        lsh_execute_ls(slice_args(args, 1, calculate_string_array_size(args)));
+    }
+}
+
 int calculate_string_array_size(char** array) {
     int size = 0;
     while (array[size] != NULL) {
         size++;
     }
     return size;
+}
+
+// A function that slices a string array
+char** slice_args(char** array, int beginning, int end) {
+    char** slice = malloc(sizeof(char*) * MAX_ARGS); // Allocate an array of strings
+    int count = 0;
+    for (int i = beginning; i < end; i++) {
+        slice[count] = malloc(sizeof(char) * MAX_ARG_SIZE); // Allocate a buffer to store strings in
+        strcpy(slice[count], array[i]); // Store th strings
+        count++;
+    }
+    slice[count] = NULL; // Required for a dynamically sized array for slice function
+    return slice;
+}
+
+int lsh_execute_ls(char** args) {
+    
 }
