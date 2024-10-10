@@ -20,7 +20,8 @@ int gvn_execute_cat(char** args, char* flags);
 int gvn_execute_cp(char** args, char* flags);
 int gvn_execute_echo(char** args, char* flags);
 int gvn_execute_pwd();
-char* gvn_get_flags(char** args);
+char* gvn_get_flags(char* line);
+int gvn_execute_grep(char** args, char* flags);
 
 int main(int argc, char* argv[]) {
     // Load config
@@ -45,7 +46,7 @@ void gvn_loop(void) {
             exit(EXIT_SUCCESS);
         }
         args = gvn_split_line(line);
-        flags = gvn_get_flags(args);
+        flags = gvn_get_flags(line);
         //printf("Flag string is: %s\n", flags);
         status = gvn_execute_args(args, flags);
     } while (status);   
@@ -74,14 +75,16 @@ char** gvn_split_line(char* line) {
 
     // We parse the line, breaking at spaces and storing it into the args buffer
     for (int i = 0; i < strlen(line); i++) {
-        if (line[i] == ' ' || line[i] == '\n' || line[i] == EOF) {
+        if ((line[i] == ' ' || line[i] == '\n' || line[i] == EOF) && !(line[i] == '-' || line[i - 1] == '-')) {
             tempString[tempIndex] = '\0'; // Null terminate the string
-            // We create a buffer at the memory location, and copy in the tempString holding the user's argcth arg
-            args[argc] = malloc(sizeof(char) * MAX_ARG_SIZE);
-            // Copy into the args array the temporary string
-            strcpy(args[argc], tempString);
-            argc++;
-            // Clear temp string
+
+            // We only add the argument if it is not a flag
+            if (tempString[0] != '-' && tempIndex > 0) {
+                // We create a buffer at the memory location, and copy in the tempString holding the user's argcth arg
+                args[argc] = malloc(sizeof(char) * MAX_ARG_SIZE);
+                strcpy(args[argc], tempString);
+                argc++;
+            }
             memset(tempString, 0, MAX_ARG_SIZE);
             tempIndex = 0;
         } else {
@@ -118,6 +121,9 @@ int gvn_execute_args(char** args, char* flags) {
     }
     else if (strcmp(command, "echo") == 0) {
         return gvn_execute_echo(slice_args(args,1, calculate_string_array_size(args)), flags);
+    }
+    else if (strcmp(command, "grep") == 0) {
+        return gvn_execute_grep(slice_args(args, 1, calculate_string_array_size(args)), flags);
     }
     else {
         printf("Unrecognized command\n");
@@ -261,12 +267,12 @@ int gvn_execute_pwd() {
     return 1;
 }
 
-char* gvn_get_flags(char** args) {
+char* gvn_get_flags(char* line) {
     char* buffer = calloc(sizeof(char), 1);
     int flag_count = 0;
-    for (int arg = 0; arg < calculate_string_array_size(args); arg++) {
-        if (args[arg][0] == '-') {
-            buffer[flag_count] = args[arg][1]; // Add the flag to the buffer
+    for (int i = 0; i < strlen(line); i++) {
+        if (i > 0 && line[i-1] == '-') {
+            buffer[flag_count] = line[i]; // Add the flag to the buffer
             flag_count++;
             if (flag_count > sizeof(buffer)) {
                 buffer = realloc(buffer, sizeof(buffer) + 1);
@@ -274,5 +280,12 @@ char* gvn_get_flags(char** args) {
         }
     }
     buffer[flag_count + 1] = '\0';
+    printf("%s\n", buffer);
     return buffer;
+}
+
+// A function that executes the grep function. Usage is grep pattern [-options] [files]
+int gvn_execute_grep(char** args, char* flags) {
+    char* pattern = args[0];
+    return 1;
 }
