@@ -20,6 +20,7 @@ int gvn_execute_cat(char** args);
 int gvn_execute_cp(char** args);
 int gvn_execute_echo(char** args);
 int gvn_execute_pwd();
+char* gvn_get_flags(char** args);
 
 int main(int argc, char* argv[]) {
     // Load config
@@ -33,6 +34,7 @@ int main(int argc, char* argv[]) {
 void gvn_loop(void) {
     char* line;
     char** args;
+    char* flags;
     int status;
 
     // We loop through once. We should read from stdin, parse the line, and execute arguments. We should do this as long as we haven't terminated
@@ -43,6 +45,8 @@ void gvn_loop(void) {
             exit(EXIT_SUCCESS);
         }
         args = gvn_split_line(line);
+        flags = gvn_get_flags(args);
+        printf("Flag string is: %s\n", flags);
 
         status = gvn_execute_args(args);
     } while (status);   
@@ -252,4 +256,20 @@ int gvn_execute_pwd() {
     char cwd[MAX_PATH];
     printf("%s ", getcwd(cwd, sizeof(cwd)));
     return 1;
+}
+
+char* gvn_get_flags(char** args) {
+    char* buffer = calloc(sizeof(char), 1);
+    int flag_count = 0;
+    for (int arg = 0; arg < calculate_string_array_size(args); arg++) {
+        if (args[arg][0] == '-') {
+            buffer[flag_count] = args[arg][1]; // Add the flag to the buffer
+            flag_count++;
+            if (flag_count > sizeof(buffer)) {
+                buffer = realloc(buffer, sizeof(buffer) + 1);
+            }
+        }
+    }
+    buffer[flag_count + 1] = '\0';
+    return buffer;
 }
