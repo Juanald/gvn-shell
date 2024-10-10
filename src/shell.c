@@ -13,12 +13,12 @@ void gvn_loop(void);
 char* gvn_read_line(void);
 char** gvn_split_line(char* line);
 int calculate_string_array_size(char** array);
-int gvn_execute_args(char** args);
-int gvn_execute_ls(char** args);
+int gvn_execute_args(char** args, char* flags);
+int gvn_execute_ls(char** args, char* flags);
 char** slice_args(char** args, int beginning, int end);
-int gvn_execute_cat(char** args);
-int gvn_execute_cp(char** args);
-int gvn_execute_echo(char** args);
+int gvn_execute_cat(char** args, char* flags);
+int gvn_execute_cp(char** args, char* flags);
+int gvn_execute_echo(char** args, char* flags);
 int gvn_execute_pwd();
 char* gvn_get_flags(char** args);
 
@@ -46,9 +46,8 @@ void gvn_loop(void) {
         }
         args = gvn_split_line(line);
         flags = gvn_get_flags(args);
-        printf("Flag string is: %s\n", flags);
-
-        status = gvn_execute_args(args);
+        //printf("Flag string is: %s\n", flags);
+        status = gvn_execute_args(args, flags);
     } while (status);   
 }
 
@@ -93,18 +92,18 @@ char** gvn_split_line(char* line) {
 }
 
 // This is a function that executes the command provided in the args array. Note that args[0] holds the command. Let's implement ls
-int gvn_execute_args(char** args) {
+int gvn_execute_args(char** args, char* flags) {
     char* command = args[0];
 
     // ls command
     if (strcmp(command, "ls") == 0) {
-        return gvn_execute_ls(slice_args(args, 1, calculate_string_array_size(args)));
+        return gvn_execute_ls(slice_args(args, 1, calculate_string_array_size(args)), flags);
     }
     else if (strcmp(command, "cat") == 0) {
-        return gvn_execute_cat(slice_args(args, 1, calculate_string_array_size(args)));
+        return gvn_execute_cat(slice_args(args, 1, calculate_string_array_size(args)), flags);
     }
     else if (strcmp(command, "cp") == 0) {
-        return gvn_execute_cp(slice_args(args, 1, calculate_string_array_size(args)));
+        return gvn_execute_cp(slice_args(args, 1, calculate_string_array_size(args)), flags);
     }
     else if (strcmp(command, "pwd") == 0) {
         return gvn_execute_pwd();
@@ -114,7 +113,7 @@ int gvn_execute_args(char** args) {
         return 1;
     }
     else if (strcmp(command, "echo") == 0) {
-        return gvn_execute_echo(slice_args(args,1, calculate_string_array_size(args)));
+        return gvn_execute_echo(slice_args(args,1, calculate_string_array_size(args)), flags);
     }
     else {
         printf("Unrecognized command\n");
@@ -144,7 +143,7 @@ char** slice_args(char** array, int beginning, int end) {
 }
 
 // Recreates ls. Lists out all directories/files with the given filename. No wildcards yet, only for windows
-int gvn_execute_ls(char** args) {
+int gvn_execute_ls(char** args, char* flags) {
     WIN32_FIND_DATAA file_found; // Stores found file data
     HANDLE hFind; // Stores handle data returned by FindFile functions
 
@@ -171,7 +170,7 @@ int gvn_execute_ls(char** args) {
 }
 
 // Implements the cat function for multiple arguments
-int gvn_execute_cat(char** args) {
+int gvn_execute_cat(char** args, char* flags) {
     FILE* f;
     char string_buffer[100];
     for (int i = 0; i < calculate_string_array_size(args); i++) {
@@ -189,7 +188,7 @@ int gvn_execute_cat(char** args) {
 }
 
 // This function copies a file args[0] and puts it into another file args[1]
-int gvn_execute_cp(char** args) {
+int gvn_execute_cp(char** args, char* flags) {
     FILE* fin = fopen(args[0], "r");
     FILE* fout = fopen(args[1], "w");
     if (fin == NULL) {
@@ -235,7 +234,7 @@ int gvn_execute_cp(char** args) {
     return 1;
 }
 
-int gvn_execute_echo(char** args) {
+int gvn_execute_echo(char** args, char* flags) {
     for (int arg = 0; arg < calculate_string_array_size(args); arg++) {
         if (args[arg][0] == '"') {
             int char_count = 1;
@@ -244,8 +243,8 @@ int gvn_execute_echo(char** args) {
                 char_count++;
             }
             char_count = 1;
-            printf("\n");
-        } else {
+            if (strstr(flags, "n") == NULL) printf("\n");
+        } else if (strchr(flags, args[arg][1]) == NULL){ // print if not a flag
             printf("%s\n", args[arg]);
         }
     }
