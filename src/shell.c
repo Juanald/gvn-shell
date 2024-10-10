@@ -67,8 +67,8 @@ A function that takes in a string, and splits it into an array of arguments. The
 */
 char** gvn_split_line(char* line) {
     // We have to initialize an array of strings to hold memory
-    char** args = malloc(sizeof(char*) * MAX_ARGS);
-    char* tempString = malloc(sizeof(char) * MAX_ARG_SIZE);
+    char** args = calloc(sizeof(char*), MAX_ARGS);
+    char* tempString = calloc(sizeof(char), MAX_ARG_SIZE);
     
     int argc = 0;
     int tempIndex = 0;
@@ -101,7 +101,6 @@ char** gvn_split_line(char* line) {
 // This is a function that executes the command provided in the args array. Note that args[0] holds the command. Let's implement ls
 int gvn_execute_args(char** args, char* flags) {
     char* command = args[0];
-
     // ls command
     if (strcmp(command, "ls") == 0) {
         return gvn_execute_ls(slice_args(args, 1, calculate_string_array_size(args)), flags);
@@ -253,11 +252,11 @@ int gvn_execute_echo(char** args, char* flags) {
                 char_count++;
             }
             char_count = 1;
-            if (strstr(flags, "n") == NULL) printf("\n");
-        } else if (strchr(flags, args[arg][1]) == NULL){ // print if not a flag
-            printf("%s\n", args[arg]);
+        } else { // print if not a flag
+            printf("%s", args[arg]);
         }
     }
+    if (strstr(flags, "n") == NULL) printf("\n");
     return 1;
 }
 
@@ -280,7 +279,6 @@ char* gvn_get_flags(char* line) {
         }
     }
     buffer[flag_count + 1] = '\0';
-    printf("%s\n", buffer);
     return buffer;
 }
 
