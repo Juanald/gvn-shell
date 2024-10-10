@@ -4,8 +4,10 @@
 #include <windows.h>
 #include <unistd.h>
 #include <limits.h> 
+#include <tchar.h>
 
 #define BUFF_SIZE 50
+#define MAX_BUF_SIZE 256
 #define MAX_ARGS 10
 #define MAX_ARG_SIZE 100
 
@@ -22,6 +24,7 @@ int gvn_execute_echo(char** args, char* flags);
 int gvn_execute_pwd();
 char* gvn_get_flags(char* line);
 int gvn_execute_grep(char** args, char* flags);
+int gvn_execute_cd(char** args, char* flags);
 
 int main(int argc, char* argv[]) {
     // Load config
@@ -123,6 +126,9 @@ int gvn_execute_args(char** args, char* flags) {
     }
     else if (strcmp(command, "grep") == 0) {
         return gvn_execute_grep(slice_args(args, 1, calculate_string_array_size(args)), flags);
+    }
+    else if (strcmp(command, "cd") == 0) {
+        return gvn_execute_cd(slice_args(args, 1, calculate_string_array_size(args)), flags);
     }
     else {
         printf("Unrecognized command\n");
@@ -286,4 +292,8 @@ char* gvn_get_flags(char* line) {
 int gvn_execute_grep(char** args, char* flags) {
     char* pattern = args[0];
     return 1;
+}
+
+int gvn_execute_cd(char** args, char* flags) {
+    return SetCurrentDirectory(args[0]);
 }
