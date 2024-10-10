@@ -49,6 +49,10 @@ void gvn_loop(void) {
         //printf("Flag string is: %s\n", flags);
         status = gvn_execute_args(args, flags);
     } while (status);   
+
+    free(line);
+    free(args);
+    free(flags);
 }
 
 char* gvn_read_line(void) {
