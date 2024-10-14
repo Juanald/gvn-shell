@@ -11,6 +11,8 @@
 #define MAX_ARGS 10
 #define MAX_ARG_SIZE 100
 
+// Why don't we allow for system calls and spawn processes? Allow the shell to execute processes would be cool.
+
 void gvn_loop(void);
 char* gvn_read_line(void);
 char** gvn_split_line(char* line);
@@ -25,6 +27,7 @@ int gvn_execute_pwd();
 char* gvn_get_flags(char* line);
 int gvn_execute_grep(char** args, char* flags);
 int gvn_execute_cd(char** args, char* flags);
+int gvn_spawn_process(char* program, char* flags);
 
 int main(int argc, char* argv[]) {
     // Load config
@@ -129,6 +132,9 @@ int gvn_execute_args(char** args, char* flags) {
     }
     else if (strcmp(command, "cd") == 0) {
         return gvn_execute_cd(slice_args(args, 1, calculate_string_array_size(args)), flags);
+    }
+    else if (command[0] == '.') {
+        return gvn_spawn_process(command, flags);
     }
     else {
         printf("Unrecognized command\n");
@@ -293,7 +299,46 @@ int gvn_execute_grep(char** args, char* flags) {
     char* pattern = args[0];
     return 1;
 }
-
+// cds into the provided directory, format cd [dir]
 int gvn_execute_cd(char** args, char* flags) {
     return SetCurrentDirectory(args[0]);
+}
+
+// Spawns a process, used for executing programs within the shell. Provided with program name
+int gvn_spawn_process(char* program, char* flags) {
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    // We are provided one argument for execution
+    char* commandLine = program;
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+
+    // We have to zero out the memory in both buffers
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    // Start the child process. 
+    if( !CreateProcess( 
+        NULL,   // No module name (use command line)
+        commandLine,        // Command line
+        NULL,           // Process handle not inheritable
+        NULL,           // Thread handle not inheritable
+        FALSE,          // Set handle inheritance to FALSE
+        0,              // No creation flags
+        NULL,           // Use parent's environment block
+        cwd,           // Use parent's starting directory 
+        &si,            // Pointer to STARTUPINFO structure
+        &pi )           // Pointer to PROCESS_INFORMATION structure
+    ) 
+    {
+        printf( "CreateProcess failed (%d).\n", GetLastError() );
+        return 1;
+    }
+
+    WaitForSingleObject(pi.hProcess, INFINITE);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return 1;
 }
