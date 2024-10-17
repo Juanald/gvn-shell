@@ -18,3 +18,18 @@ Looking at implementing commands like grep and regex search in the future, as we
 Recently implemented the basic workings of a lexical analyser which is able to detect operators, identifiers, integers, delimeters, and reserved keywords! Planning on using this to perform more in depth syntactical analysis, and implement operators like redirection(>) and pipe(|)!
 
 I've also implemented the ability to spawn processes within the shell. You may run any executable, or program within the shell. The shell spawns a child process where the program runs. This is currently only available for Windows, as I have made use of the Windows API. UNIX implementation is not difficult, it would simply require use of the POSIX threads library.
+
+# Running GVN
+In order to run GVN, first clone the git repo with the following command:
+```
+git clone https://github.com/Juanald/gvn-shell.git
+```
+Then enter the shell source directory created with `cd shell/src`. Then build the project using the Makefile provided. Run:
+```
+make shell
+```
+Finally, run the compiled shell executable in your terminal with:
+```
+./shell.exe
+```
+Enjoy!
