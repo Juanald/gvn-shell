@@ -4,7 +4,7 @@ This is a shell I wrote on my free time, with a little help from [https://brenna
 
 # Capabilities
 
-Implements basic UNIX commands. Only works on Windows due to my usage of the Windows API. UNIX commands like cat, echo, ls, cp, pwd, and clear have been implemented. We have also implemented a flag system that is able to use different commands with options. For
+Implements basic UNIX commands. Only works on Windows due to my usage of the Windows API. UNIX commands like cat, echo, ls, cp, pwd, and clear have been implemented. I have also implemented a flag system that is able to use different commands with options. For
 example, we have:
 
 ```
